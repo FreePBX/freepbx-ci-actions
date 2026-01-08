@@ -1,12 +1,13 @@
-name: ReleasePush
+name: ModuleReleasePush
 
 # SPDX-FileCopyrightText: 2026 Sangoma US Inc.
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # This file should be copied into each module that needs translating.
 # Place in the .github/workflows/ directory in the release/* branches.
+# (Or in all active release/*, weblate/* and base branches if that is easier.)
 
-run-name: "ReleasePush ${{ github.run_number }}/${{ github.run_attempt }} (${{ github.event_name }}) by @${{ github.actor }}"
+run-name: "ModuleReleasePush ${{ github.run_number }}/${{ github.run_attempt }} (${{ github.event_name }}) by @${{ github.actor }}"
 
 on:
   push:
