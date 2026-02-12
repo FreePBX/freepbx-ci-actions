@@ -1,0 +1,58 @@
+name: SharedReleasePush
+
+# SPDX-FileCopyrightText: 2026 Sangoma US Inc.
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# This workflow should be executed upon push to a release/x branch.
+# It quickly sync's release/x into weblate/x.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+
+env:
+  # These values should match your version numbers and grow with you.
+  WEBLATE_BRANCH: ${{ endsWith(github.ref,'/16.0') && 'weblate/16.0' ||
+                      endsWith(github.ref,'/17.0') && 'weblate/17.0' ||
+                      endsWith(github.ref,'/18.0') && 'weblate/18.0' ||
+                      'weblate/0' }}
+  # The release/x numbering is nearly the same as the weblate/x numbering.
+  RELEASE_BRANCH: ${{ endsWith(github.ref,'/16.0') && 'release/16.0' ||
+                      endsWith(github.ref,'/17.0') && 'release/17.0' ||
+                      endsWith(github.ref,'/18.0') && 'release/18.0' ||
+                      'release/0' }}
+    
+jobs:
+  Merge:
+    name: Merge release/x to weblate/x
+    runs-on: ubuntu-latest
+    concurrency:
+      group: check-shared-release-push-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout full
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout release/x branch
+        run: git checkout "${RELEASE_BRANCH}"
+
+      - name: Checkout weblate/x branch
+        run: git checkout "${WEBLATE_BRANCH}"
+
+      - name: Prep git bot user info
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions"
+
+      - name: Merge release/x branch into weblate/x branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: git merge "${RELEASE_BRANCH}"
+
+      - name: Push weblate/x branch
+        run: git push

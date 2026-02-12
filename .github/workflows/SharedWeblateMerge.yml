@@ -1,0 +1,93 @@
+name: SharedWeblateMerge
+
+# SPDX-FileCopyrightText: 2026 Sangoma US Inc.
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# This workflow should be executed after a successfully completed push action
+# to a weblate/x branch. A number of checks are executed to verify the push
+# stayed within the confines of a specified directory (if LIMIT_DIR defined.)
+# If all is good, then the PR is merged, and weblate/x is sync'd to release/x.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+env:
+  # Changes in weblate/x outside the LIMIT_DIR are blocked from merging
+  # automatically -- if defined -- leave it blank to skip this check.
+  LIMIT_DIR:      i18n
+  # These values should match your version numbers and grow with you.
+  WEBLATE_BRANCH: ${{ endsWith(github.event.workflow_run.head_branch,'/16.0') && 'weblate/16.0' ||
+                      endsWith(github.event.workflow_run.head_branch,'/17.0') && 'weblate/17.0' ||
+                      endsWith(github.event.workflow_run.head_branch,'/18.0') && 'weblate/18.0' ||
+                      'weblate/0' }}
+  # The release/x numbering is nearly the same as the weblate/x numbering.
+  RELEASE_BRANCH: ${{ endsWith(github.event.workflow_run.head_branch,'/16.0') && 'release/16.0' ||
+                      endsWith(github.event.workflow_run.head_branch,'/17.0') && 'release/17.0' ||
+                      endsWith(github.event.workflow_run.head_branch,'/18.0') && 'release/18.0' ||
+                      'release/0' }}
+
+jobs:
+  MergePR:
+    name: Auto merge PR
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    concurrency:
+      group: check-shared-weblate-merge-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout full
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout release/x branch
+        run: git checkout "${RELEASE_BRANCH}"
+
+      - name: Checkout weblate/x branch
+        run: git checkout "${WEBLATE_BRANCH}"
+
+      - name: Count number of files changed outside of the specified directory
+        run: |
+          {
+            echo 'ROGUE_FILES<<EOF'
+            git diff --compact-summary "${RELEASE_BRANCH}" "${WEBLATE_BRANCH}" \
+              | head -n -1 \
+              | grep -v "^ ${LIMIT_DIR}/" \
+              | wc -l
+            echo EOF
+          } >> "$GITHUB_ENV"
+
+      - name: Confirm weblate/x branch changes were within limits
+        run: exit $ROGUE_FILES
+
+      - name: Merge Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh pr merge "${WEBLATE_BRANCH}" --auto --merge
+
+      - name: Checkout release/x branch
+        run: git checkout "${RELEASE_BRANCH}"
+
+      - name: Sync release/x branch post PR merge
+        run: git pull
+
+      - name: Checkout weblate/x branch
+        run: git checkout "${WEBLATE_BRANCH}"
+
+      - name: Sync local weblate/x branch
+        run: git pull
+
+      - name: Merge release/x branch into local weblate/x branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: git merge "${RELEASE_BRANCH}"
+
+      - name: Push local weblate/x branch
+        run: git push
+
