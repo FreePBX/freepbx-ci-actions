@@ -84,7 +84,7 @@ jobs:
           cat make-pr-error.log
           if [ "${RACE_CONDITION}" == "1" ]; then
             echo "Ooh race condition detected - no worries - we didn't need the PR anyhow!"
-          echo
+          else
             echo "Uh oh it looks serious. Why no PR ?"
             exit 1
           fi
