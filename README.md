@@ -2,15 +2,17 @@
 FreePBX CI GitHub Actions.
 
 ## Background
-Starting in 2026, FreePBX will begin using GitHub Actions to trigger multiple
-processes, initially including **language translations via Weblate**, and
-potentially soon:
+Starting in 2026, FreePBX will begin using *a lot more* GitHub Actions to trigger multiple
+processes, initially including **language translations via Weblate**, and potentially soon:
 * code linting
 * unit testing
 * security scanning
 * PR verifying
 * cherry picking
 ...and other basic quality assurance and automatable management tasks.
+
+A few things have been done in the past -- see for example the workflows in the
+[FreePBX org-level .github repo](https://github.com/FreePBX/.github/tree/master/.github/workflows).
 
 ## Setup Each Module to Use Shared Actions
 To utilize these features, the **freepbx-ci-actions** repo needs to be used by
