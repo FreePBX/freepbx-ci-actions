@@ -14,7 +14,7 @@ on:
     branches:
       - 'weblate/*'
     paths:
-      - 'i18n/*'
+      - 'i18n/**'
 
 permissions:
   contents: read
