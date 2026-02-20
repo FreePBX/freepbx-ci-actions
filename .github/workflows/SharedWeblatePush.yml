@@ -81,7 +81,10 @@ jobs:
       - name: Check if PR was not made due to race condition
         if: steps.make-pr-step.outcome == 'failure'
         run: |
-          if [ "${RACE_CONDITION}" != "1" ]; then
-            cat make-pr-error.log
+          cat make-pr-error.log
+          if [ "${RACE_CONDITION}" == "1" ]; then
+            echo "Ooh race condition detected - no worries - we didn't need the PR anyhow!"
+          echo
+            echo "Uh oh it looks serious. Why no PR ?"
             exit 1
           fi
