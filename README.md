@@ -23,7 +23,8 @@ directory from **freepbx-ci-actions** into the respective FreePBX module's
 those stay in* **freepbx-ci-actions** *as work is centralized there.*
 
 There are a few other repo-level settings to consider. See the **Actions** and
-**Webhooks** pages from another working module *and copy them.*
+**Webhooks** pages from another working module *and copy them.* **You'll also need
+to enable Auto Merge in the General settings page!**
 
 ## How Translations Work
 The Weblate server is notified via POST Webhook from GitHub whenever there are
