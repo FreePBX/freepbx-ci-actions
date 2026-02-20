@@ -79,7 +79,9 @@ jobs:
           VALIDATE_JSCPD: false
 
       - name: Check if PR was not made due to race condition
-        if: steps.make-pr-step.outcome == 'failure' && ${{ env.RACE_CONDITION != '1' }}
+        if: steps.make-pr-step.outcome == 'failure'
         run: |
-          cat make-pr-error.log
-          exit 1
+          if [ "${RACE_CONDITION}" != "1" ]; then
+            cat make-pr-error.log
+            exit 1
+          fi
