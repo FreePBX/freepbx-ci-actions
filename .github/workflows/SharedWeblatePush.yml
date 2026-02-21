@@ -35,6 +35,8 @@ jobs:
     concurrency:
       group: check-shared-weblate-push-${{ github.ref }}
       cancel-in-progress: true
+    outputs:
+      race_condition: ${{ steps.set-rc.outputs.rc }}
     steps:
       - name: Checkout full
         uses: actions/checkout@v6
@@ -82,9 +84,14 @@ jobs:
             exit 1
           fi
 
+      - name: Pass any race condition on to the next job
+        id: set-rc
+        run: echo "rc=${RACE_CONDITION}" >> "$GITHUB_OUTPUT"
+
   LintAfterMake:
-    needs: [ MakePR ]
-    if: ${{ needs.MakePR.result == 'success' }}
+    name: Lint weblate branch
+    needs: MakePR
+    if: ${{ needs.MakePR.result == 'success' }} && ${{ needs.MakePR.outputs.race_condition != '1' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full
