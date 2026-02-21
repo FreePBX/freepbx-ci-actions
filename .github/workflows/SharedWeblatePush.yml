@@ -91,7 +91,8 @@ jobs:
   LintAfterMake:
     name: Lint weblate branch
     needs: MakePR
-    if: ${{ needs.MakePR.result == 'success' }} && ${{ needs.MakePR.outputs.race_condition != '1' }}
+    if: ${{ needs.MakePR.result == 'success' &&
+            needs.MakePR.outputs.race_condition != '1' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full
