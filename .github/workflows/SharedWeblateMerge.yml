@@ -78,7 +78,7 @@ jobs:
         run: |
           {
             echo 'MERGE_STATUS<<EOF'
-            gh pr merge "${WEBLATE_BRANCH}" --auto --rebase --admin
+            gh pr merge "${WEBLATE_BRANCH}" --rebase --admin
             echo EOF
           } >> "$GITHUB_ENV"
 
@@ -87,7 +87,7 @@ jobs:
 
   SyncAfterMerge:
     needs: [ MergePR ]
-    if: ${{ always() }}
+    if: ${{ needs.MergePR.result == success() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full
