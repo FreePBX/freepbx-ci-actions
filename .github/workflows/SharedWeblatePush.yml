@@ -60,8 +60,8 @@ jobs:
             2> make-pr-error.log
 
       # Handle race condition between external Weblate and SharedReleasePush.yml
-      - name: Check if PR was made
-        if: steps.make-pr-step.outcome == 'failure'
+      - name: Only run if PR not made
+        if: steps.make-pr-step.outcome != 'success'
         run: |
           {
             echo 'RACE_CONDITION<<EOF'
@@ -71,15 +71,8 @@ jobs:
             echo EOF
           } >> "$GITHUB_ENV"
 
-      - name: Super-linter slim validation only
-        uses: super-linter/super-linter/slim@v8.3.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_JSCPD: false
-
-      - name: Check if PR was not made due to race condition
-        if: steps.make-pr-step.outcome == 'failure'
+      - name: Determine if failure to make PR is acceptable
+        if: steps.make-pr-step.outcome != 'success'
         run: |
           cat make-pr-error.log
           if [ "${RACE_CONDITION}" == "1" ]; then
@@ -88,3 +81,23 @@ jobs:
             echo "Uh oh it looks serious. Why no PR ?"
             exit 1
           fi
+
+  LintAfterMake:
+    needs: [ MakePR ]
+    if: ${{ needs.MakePR.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout weblate/x branch
+        run: git checkout "${WEBLATE_BRANCH}"
+
+      - name: Super-linter slim validation only
+        uses: super-linter/super-linter/slim@v8.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_JSCPD: false
