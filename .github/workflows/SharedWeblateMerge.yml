@@ -16,6 +16,7 @@ permissions:
   pull-requests: write
 
 env:
+  PR_NUMBER:      ${{ github.event.number }}
   # Changes in weblate/x outside the LIMIT_DIR are blocked from merging
   # automatically -- if defined -- leave it blank to skip this check.
   LIMIT_DIR:      i18n
@@ -64,11 +65,11 @@ jobs:
       - name: Confirm weblate/x branch changes were within limits
         run: exit $ROGUE_FILES
 
-      - name: Approve Pull Request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: gh pr review --approve --body "Approved!"
+#      - name: Approve Pull Request
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GH_REPO: ${{ github.repository }}
+#        run: gh pr review --approve --body "Approved!"
           
       - name: Merge Pull Request
         env:
@@ -77,12 +78,22 @@ jobs:
         run: |
           {
             echo 'MERGE_STATUS<<EOF'
-            gh pr merge "${WEBLATE_BRANCH}" --auto --merge
+            gh pr merge "${WEBLATE_BRANCH}" --auto --rebase --admin
             echo EOF
           } >> "$GITHUB_ENV"
 
       - name: Confirm PR merge success
         run: exit $MERGE_STATUS
+
+  SyncAfterMerge:
+    needs: [ MergePR ]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Checkout release/x branch
         run: git checkout "${RELEASE_BRANCH}"
