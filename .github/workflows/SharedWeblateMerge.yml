@@ -16,7 +16,6 @@ permissions:
   pull-requests: write
 
 env:
-  PR_NUMBER:      ${{ github.event.number }}
   # Changes in weblate/x outside the LIMIT_DIR are blocked from merging
   # automatically -- if defined -- leave it blank to skip this check.
   LIMIT_DIR:      i18n
