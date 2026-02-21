@@ -86,7 +86,7 @@ jobs:
 
   SyncAfterMerge:
     needs: [ MergePR ]
-    if: ${{ needs.MergePR.result == success() }}
+    if: ${{ needs.MergePR.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full
