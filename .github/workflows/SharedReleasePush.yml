@@ -60,11 +60,15 @@ jobs:
       - name: Push potential POT into base POT
         run: msgmerge --update i18n/${{ github.event.repository.name }}.pot /tmp/potential.pot
 
-      - name: Add the base POT
-        run: git add i18n/${{ github.event.repository.name }}.pot
-
       - name: Possible POT work
-        run: git diff --quiet && git diff --staged --quiet || (git commit -m "chore: translation template updates" && git push)
+        run: |
+          git add i18n/${{ github.event.repository.name }}.pot || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: translation template updates"
+            git push
+          else
+            echo "No changes."
+          fi
 
       - name: Checkout weblate/x branch
         run: git checkout "${WEBLATE_BRANCH}"
