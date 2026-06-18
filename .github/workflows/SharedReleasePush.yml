@@ -37,16 +37,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout release/x branch
-        run: git checkout "${RELEASE_BRANCH}"
-
-      - name: Checkout weblate/x branch
-        run: git checkout "${WEBLATE_BRANCH}"
-
       - name: Prep git bot user info
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions"
+
+      - name: Checkout release/x branch
+        run: git checkout "${RELEASE_BRANCH}"
+
+      - name: Install gettext
+        run: sudo apt-get install -y gettext
+
+      - name: Ensure i18n directory exists
+        run: mkdir -p i18n
+
+      - name: Ensure base POT exists
+        run: touch i18n/${{ github.event.repository.name }}.pot
+
+      - name: Generate potential POT
+        run: find . -type f \( -name "*.php" -o -name "*.js" \) | xargs xgettext --add-comments --no-location --output=/tmp/potential.pot
+
+      - name: Push potential POT into base POT
+        run: msgmerge --update i18n/${{ github.event.repository.name }}.pot /tmp/potential.pot
+
+      - name: Add the base POT
+        run: git add i18n/${{ github.event.repository.name }}.pot
+
+      - name: Possible POT work
+        run: git diff --quiet && git diff --staged --quiet || (git commit -m "chore: translation template updates" && git push)
+
+      - name: Checkout weblate/x branch
+        run: git checkout "${WEBLATE_BRANCH}"
 
       - name: Merge release/x branch into weblate/x branch
         env:
