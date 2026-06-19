@@ -63,6 +63,7 @@ jobs:
 
       - name: Possible POT work
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHORE_BRANCH: chores/pot-cleaning-${{ github.run_id }}
           POT_BASE: ${{ github.event.repository.name }}
         run: |
