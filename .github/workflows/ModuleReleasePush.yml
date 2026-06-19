@@ -13,6 +13,8 @@ on:
   push:
     branches:
       - 'release/*'
+    paths-ignore:
+      - 'i18n/**'
 
 permissions:
   contents: write
