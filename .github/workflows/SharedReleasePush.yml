@@ -5,6 +5,8 @@ name: SharedReleasePush
 
 # This workflow should be executed upon push to a release/x branch.
 # It quickly sync's release/x into weblate/x.
+# It also updates the POT localization files if any strings were changed,
+# giving Weblate near-immediate access to new strings on every push in GH.
 
 on:
   workflow_call:
@@ -87,9 +89,6 @@ jobs:
         run: git checkout "${WEBLATE_BRANCH}"
 
       - name: Merge release/x branch into weblate/x branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
         run: git merge "${RELEASE_BRANCH}"
 
       - name: Push weblate/x branch

@@ -27,6 +27,11 @@ There are a few other repo-level settings to consider. See the **Actions** and
 to enable Auto Merge in the General settings page!**~~
 
 ## How Translations Work
+New or changed strings are processed in the GitHub Action SharedReleasePush.yml
+to rebuild the POT localization template file using xgettext and msgmerge tools.
+This happens automatically on code pushes into the repo. Locations are not saved
+so as to help reduce rippling commits (as seen in the old module packaging script.)
+
 The Weblate server is notified via POST Webhook from GitHub whenever there are
 changes to a module's repository. The Weblate server then looks at the release/*
 branches for new strings to translate, which it does automatically if there are
@@ -44,4 +49,4 @@ One should carefully inspect the errors to determine the best course of action.
 In the case of linting problems, it may be sufficient to manually merge the PR.
 But if there's a bad push from the Weblate server, then an issue should be
 raised in the [issue tracker](https://github.com/FreePBX/issue-tracker/) as
-this could indicate a more sever problem with the server, shared actions, etc.
+this could indicate a more severe problem with the server, shared actions, etc.
