@@ -58,7 +58,7 @@ jobs:
         run: touch i18n/${{ github.event.repository.name }}.pot
 
       - name: Generate potential POT
-        run: find . -type f \( -name "*.php" -o -name "*.js" \) | xargs xgettext --add-comments --no-location --output=/tmp/potential.pot
+        run: find . -type f \( -name "*.php" -o -name "*.js" \) | xargs xgettext --from-code=UTF-8 --add-comments --no-location --output=/tmp/potential.pot
 
       - name: Push potential POT into base POT
         run: msgmerge --update i18n/${{ github.event.repository.name }}.pot /tmp/potential.pot
